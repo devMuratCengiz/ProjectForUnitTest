@@ -85,5 +85,156 @@ namespace ProjectForUnitTest.Test
             Assert.Equal(product.Id, resultProduct.Id);
             Assert.Equal(product.Name, resultProduct.Name);
         }
+
+        [Fact]
+        public void Create_ActionExecutes_ReturnView()
+        {
+            var result = _controller.Create();
+
+            Assert.IsType<ViewResult>(result);
+        }
+        [Fact]
+        public async void CreatePOST_InValidModelState_ReturnView()
+        {
+            _controller.ModelState.AddModelError("Name", "Name alanı gereklidir.");
+            var result = await _controller.Create(products.First());
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.IsType<Product>(viewResult.Model);
+        }
+        [Fact]
+        public async void CreatePOST_ValidModelState_ReturnRedirectToIndexAction()
+        {
+            var result = await _controller.Create(products.First());
+
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+
+            Assert.Equal("Index", redirect.ActionName);
+        }
+
+        [Fact]
+        public async void CreatePOST_ValidModelState_CreateMethodExecute()
+        {
+            Product newProduct = null;
+            _mockRepo.Setup(repo => repo.Create(It.IsAny<Product>())).Callback<Product>(x => newProduct = x);
+
+            var result = await _controller.Create(products.First());
+            _mockRepo.Verify(repo => repo.Create(It.IsAny<Product>()), Times.Once);
+            Assert.Equal(products.First().Id, newProduct.Id);
+
+        }
+
+        [Fact]
+        public async void CreatePOST_InValidModelState_NeverCreateExecute()
+        {
+            _controller.ModelState.AddModelError("Name", "...");
+
+            var result = await _controller.Create(products.First());
+            _mockRepo.Verify(repo => repo.Create(It.IsAny<Product>()), Times.Never);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        public async void Edit_InValidId_ReturnNotFound(int productId)
+        {
+            Product product = null;
+            _mockRepo.Setup(x => x.GetById(productId)).ReturnsAsync(product);
+            var result = await _controller.Edit(productId);
+
+            var redirect = Assert.IsType<NotFoundResult>(result);
+            Assert.Equal<int>(404, redirect.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(2)]
+        public async void Edit_ActionExecute_ReturnProduct(int productId)
+        {
+            var product = products.First(x => x.Id == productId);
+            _mockRepo.Setup(repot => repot.GetById(productId)).ReturnsAsync(product);
+            var result = await _controller.Edit(productId);
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var resultProduct = Assert.IsAssignableFrom<Product>(viewResult.Model);
+            Assert.Equal(product.Id, resultProduct.Id);
+            Assert.Equal(product.Name, resultProduct.Name);
+        }
+
+        [Theory]
+        [InlineData(2)]
+        public void EditPOST_IdIsNotEqualProduct_ReturnNotFound(int productId)
+        {
+            var result = _controller.Edit(1,products.First(x=>x.Id == productId));
+
+            var redirect = Assert.IsType<NotFoundResult>(result);
+            
+        }
+
+        [Theory]
+        [InlineData(2)]
+        public void EditPOST_InValidModelState_ReturnView(int productId)
+        {
+            _controller.ModelState.AddModelError("Name", "...");
+            var result = _controller.Edit(productId, products.First(x => x.Id == productId));
+
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.IsType<Product>(viewResult.Model);
+        }
+
+        [Theory]
+        [InlineData(2)]
+        public void EditPOST_ValidModelState_ReturnRedirectToIndexAction(int productId)
+        {
+            var result = _controller.Edit(productId, products.First(x => x.Id == productId));
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirect.ActionName);
+        }
+
+        [Theory]
+        [InlineData(2)]
+        public void EditPOST_ValidModelState_UpdateMethodExecute(int productId)
+        {
+            Product product = products.First(x => x.Id==productId);
+            _mockRepo.Setup(repo => repo.Update(product));
+            _controller.Edit(productId, product);
+            _mockRepo.Verify(repo => repo.Update(It.IsAny<Product>()), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        public async void Delete_IdIsNotEqualProduct_ReturnNotFound(int productId)
+        {
+            Product product = null;
+            _mockRepo.Setup(x => x.GetById(productId)).ReturnsAsync(product);
+            var result = await _controller.Delete(productId);
+            Assert.IsType<NotFoundResult>(result);
+            
+        }
+
+        [Theory]
+        [InlineData(1)]
+        public async void Delete_ActionExecutes_ReturnProduct(int productId)
+        {
+            var product = products.First(x => x.Id == productId);
+            _mockRepo.Setup(repo => repo.GetById(productId)).ReturnsAsync(product);
+            var result = await _controller.Delete(productId);
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.IsAssignableFrom<Product>(viewResult.Model);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        public async void DeleteConfirmed_ActionExecutes_ReturnRedirectToAction(int productId)
+        {
+            var result = await _controller.DeleteConfirmed(productId);
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirect.ActionName);
+        }
+        [Theory]
+        [InlineData(1)]
+        public async void DeleteConfirmed_ActionExecutes_DeleteMethodExecute(int productId)
+        {
+            var product = products.First(x=>x.Id==productId);
+            _mockRepo.Setup(repo => repo.Delete(product));
+            await _controller.DeleteConfirmed(productId);
+            _mockRepo.Verify(repo => repo.Delete(It.IsAny<Product>()), Times.Once);
+        }
     }
 }

@@ -62,8 +62,6 @@ namespace ProjectForUnitTest.Web.Controllers
         // GET: Product/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            
-
             var product = await _repository.GetById(id);
             if (product == null)
             {
@@ -112,10 +110,9 @@ namespace ProjectForUnitTest.Web.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var product = await _repository.GetById(id);
-            if (product != null)
-            {
+            
                 _repository.Delete(product);
-            }
+            
 
             return RedirectToAction(nameof(Index));
         }
