@@ -1,0 +1,1 @@
+Bu proje, bir .NET uygulamasında MVC ve API controller'ları için CRUD işlemlerini test etmek amacıyla xUnit ve Moq kullanarak yazılmış unit testlerini içermektedir. Mocking ile bağımlılıklar taklit edilerek, controller metodlarının doğru çalışıp çalışmadığı assert yöntemleriyle doğrulanmıştır.
