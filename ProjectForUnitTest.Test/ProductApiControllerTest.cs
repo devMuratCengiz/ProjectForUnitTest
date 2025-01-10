@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ProjectForUnitTest.Web.Controllers;
+using ProjectForUnitTest.Web.Helpers;
 using ProjectForUnitTest.Web.Models;
 using ProjectForUnitTest.Web.Repositories;
 using System;
@@ -15,11 +16,13 @@ namespace ProjectForUnitTest.Test
     {
         private readonly Mock<IRepository<Product>> _mockRepo;
         private readonly ProductsController _controller;
+        private readonly Helper _helper;
 
         private List<Product> products;
 
         public ProductApiControllerTest()
         {
+            _helper = new Helper();
             _mockRepo = new Mock<IRepository<Product>>();
             _controller = new ProductsController(_mockRepo.Object);
             products = new List<Product>() {
@@ -44,6 +47,15 @@ namespace ProjectForUnitTest.Test
                 Color ="Mavi",
                 Price = 20
             } };
+        }
+
+
+        [Theory]
+        [InlineData(2, 6, 8)]
+        public void Add_SampleValues_ReturnTotal(int a, int b, int total)
+        {
+            var result = _helper.Add(a, b);
+            Assert.Equal(total, result);
         }
 
         [Fact]

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ProjectForUnitTest.Web.Controllers;
+using ProjectForUnitTest.Web.Helpers;
 using ProjectForUnitTest.Web.Models;
 using ProjectForUnitTest.Web.Repositories;
 using System;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ProjectForUnitTest.Test
@@ -17,6 +19,7 @@ namespace ProjectForUnitTest.Test
     {
         private readonly Mock<IRepository<Product>> _mockRepo;
         private readonly ProductController _controller;
+
         private List<Product> products;
 
         public ProductControllerTest()
@@ -46,6 +49,10 @@ namespace ProjectForUnitTest.Test
                 Price = 20
             } };
         }
+
+        
+
+
         [Fact]
         public async void Index_ActionExecutes_ReturnView()
         {

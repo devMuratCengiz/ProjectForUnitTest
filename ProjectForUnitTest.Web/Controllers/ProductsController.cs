@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ProjectForUnitTest.Web.Helpers;
 using ProjectForUnitTest.Web.Models;
 using ProjectForUnitTest.Web.Models.Context;
 using ProjectForUnitTest.Web.Repositories;
@@ -22,11 +24,17 @@ namespace ProjectForUnitTest.Web.Controllers
             _repository = repository;
         }
 
+        [HttpGet("{a}/{b}")]
+        public IActionResult Add(int a, int b)
+        {
+            return Ok(new Helper().Add(a, b));
+        }
 
         // GET: api/Products
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {
+           
             var products = await _repository.GetAll();
 
             return Ok(products);
